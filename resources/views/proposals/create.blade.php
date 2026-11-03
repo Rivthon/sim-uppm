@@ -1,0 +1,3 @@
+@extends('layouts.app')
+@section('title', 'Buat Proposal')
+@section('body')<x-app-shell title="Buat Proposal"><div class="page-intro"><div><span class="eyebrow eyebrow-dark">Draft baru</span><h2>Proposal Penelitian / PkM</h2><p>Isi substansi dan simpan sebagai draft. Proposal baru terkunci setelah diajukan.</p></div></div>@if($grantPeriods->isEmpty())<div class="warning-alert">Belum ada program hibah yang berstatus dibuka. Hubungi admin UPPM.</div>@else<form class="form-panel proposal-form" method="POST" action="{{ route('proposals.store') }}" enctype="multipart/form-data">@include('proposals._form')</form>@endif</x-app-shell>@endsection

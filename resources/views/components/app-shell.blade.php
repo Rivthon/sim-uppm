@@ -8,7 +8,7 @@
             <a href="#" class="nav-item"><span>⌁</span>Renstra & Roadmap</a>
             <p class="nav-heading">Program</p>
             <a href="{{ route('grants.index') }}" class="nav-item {{ request()->routeIs('grants.*') ? 'active' : '' }}"><span>✦</span>Program & Hibah</a>
-            <a href="#" class="nav-item"><span>□</span>Proposal</a><a href="#" class="nav-item"><span>◎</span>Reviewer</a><a href="#" class="nav-item"><span>▱</span>Kontrak & Pendanaan</a>
+            <a href="{{ route('proposals.index') }}" class="nav-item {{ request()->routeIs('proposals.*') ? 'active' : '' }}"><span>□</span>Proposal</a><a href="#" class="nav-item"><span>◎</span>Reviewer</a><a href="#" class="nav-item"><span>▱</span>Kontrak & Pendanaan</a>
             <p class="nav-heading">Pelaksanaan</p><a href="#" class="nav-item"><span>↗</span>Monitoring & Evaluasi</a><a href="#" class="nav-item"><span>▥</span>Laporan & Luaran</a>
         </nav>
         <div class="sidebar-user"><div class="avatar">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</div><div><strong>{{ auth()->user()->name }}</strong><span>{{ auth()->user()->roleLabel() }}</span></div></div>

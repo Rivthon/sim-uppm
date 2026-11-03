@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Proposal;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -19,6 +20,14 @@ class DashboardController extends Controller
             ['name' => 'Laporan & Luaran', 'description' => 'Laporan akhir, publikasi, HKI, buku, produk, dan bukti.', 'icon' => 'chart', 'status' => 'Capaian'],
         ];
 
-        return view('dashboard', compact('modules'));
+        $proposalQuery = Proposal::query()
+            ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->whereBelongsTo(auth()->user(), 'lead'));
+
+        $stats = [
+            'proposals' => (clone $proposalQuery)->count(),
+            'submitted' => (clone $proposalQuery)->where('status', 'submitted')->count(),
+        ];
+
+        return view('dashboard', compact('modules', 'stats'));
     }
 }
