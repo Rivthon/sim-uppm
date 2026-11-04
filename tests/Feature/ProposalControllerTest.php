@@ -77,6 +77,7 @@ class ProposalControllerTest extends TestCase
 
         $response = $this->actingAs($lecturer)->post(route('proposals.store'), $this->validPayload($period, $field, [
             'abstract' => 'Terlalu singkat.',
+            'members' => $this->emptyMemberRows(),
         ]));
 
         $response->assertSessionDoesntHaveErrors(['abstract']);
@@ -100,6 +101,7 @@ class ProposalControllerTest extends TestCase
 
         $response = $this->actingAs($lecturer)->put(route('proposals.update', $proposal), $this->validPayload($period, $field, [
             'methodology' => 'Terlalu singkat.',
+            'members' => $this->emptyMemberRows(),
         ]));
 
         $response->assertSessionDoesntHaveErrors(['methodology']);
@@ -124,5 +126,16 @@ class ProposalControllerTest extends TestCase
             'duration_months' => 12,
             ...$overrides,
         ];
+    }
+
+    /** @return array<int, array<string, string>> */
+    private function emptyMemberRows(): array
+    {
+        return array_fill(0, 3, [
+            'name' => '',
+            'identity_number' => '',
+            'member_type' => 'dosen',
+            'study_program' => '',
+        ]);
     }
 }

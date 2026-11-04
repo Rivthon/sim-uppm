@@ -10,6 +10,18 @@ use Illuminate\Validation\Validator;
 
 class UpdateProposalRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $members = collect($this->input('members', []))
+            ->filter(fn (mixed $member): bool => is_array($member) && (filled($member['name'] ?? null)
+                || filled($member['identity_number'] ?? null)
+                || filled($member['study_program'] ?? null)))
+            ->values()
+            ->all();
+
+        $this->merge(['members' => $members]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */
