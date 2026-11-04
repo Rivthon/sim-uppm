@@ -2,10 +2,7 @@
 @section('title', 'Beranda')
 @section('body')
 <div class="public-home">
-    <header class="public-nav">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark">U</span><span><strong>{{ $settings->site_name }}</strong><small>{{ $settings->tagline }}</small></span></a>
-        <nav><a href="#tentang">Tentang</a><a href="#informasi">Informasi</a><a href="#kontak">Kontak</a>@auth<a class="public-login" href="{{ route('dashboard') }}">Buka Dashboard</a>@else<a class="public-login" href="{{ route('login') }}">Masuk Portal</a>@endauth</nav>
-    </header>
+    <x-public-navigation :settings="$settings" :menu-pages="$menuPages" />
 
     <main>
         <section class="public-hero">

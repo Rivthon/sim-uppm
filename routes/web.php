@@ -26,6 +26,7 @@ use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalDecisionController;
 use App\Http\Controllers\ProposalDocumentController;
 use App\Http\Controllers\ProposalSubmissionController;
+use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\ReportingDocumentController;
 use App\Http\Controllers\ResearchFieldController;
 use App\Http\Controllers\ResearchOutputController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\StudyProgramController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/informasi/{public_page:slug}', [PublicPageController::class, 'show'])->name('public-pages.show');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [PasLoginController::class, 'create'])->name('login');
@@ -51,6 +53,8 @@ Route::middleware(['auth', 'authorized.pas'])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/pengaturan-website', [SiteSettingController::class, 'edit'])->name('site-settings.edit');
     Route::put('/pengaturan-website', [SiteSettingController::class, 'update'])->name('site-settings.update');
+    Route::resource('/pengaturan-website/halaman', PublicPageController::class)
+        ->except('show')->parameters(['halaman' => 'public_page'])->names('public-pages');
     Route::get('/ruang-kerja/{type}', ActivityWorkspaceController::class)->whereIn('type', ['penelitian', 'pkm'])->name('workspaces.show');
     Route::post('/dashboard/kpi', [KpiTargetController::class, 'store'])->name('dashboard.kpi.store');
     Route::get('/rekap-akreditasi', [AccreditationController::class, 'index'])->name('accreditation.index');
