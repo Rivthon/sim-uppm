@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('monitoring_evaluations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('funding_contract_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('progress_report_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('evaluator_id')->constrained('users')->restrictOnDelete();
+            $table->dateTime('scheduled_at');
+            $table->string('mode', 20);
+            $table->unsignedTinyInteger('score')->nullable();
+            $table->text('findings')->nullable();
+            $table->text('recommendations')->nullable();
+            $table->text('follow_up')->nullable();
+            $table->string('status', 20)->default('scheduled');
+            $table->timestamp('completed_at')->nullable();
+            $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
+            $table->timestamps();
+            $table->index(['evaluator_id', 'status', 'scheduled_at']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('monitoring_evaluations');
+    }
+};

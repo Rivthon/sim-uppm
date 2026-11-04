@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('funding_contracts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('proposal_id')->unique()->constrained()->restrictOnDelete();
+            $table->string('contract_number')->unique();
+            $table->string('decree_number')->nullable();
+            $table->date('signed_at');
+            $table->date('starts_at');
+            $table->date('ends_at');
+            $table->unsignedBigInteger('contract_value');
+            $table->string('status', 20)->default('draft');
+            $table->string('document_path')->nullable();
+            $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
+            $table->timestamps();
+            $table->index(['status', 'starts_at']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('funding_contracts');
+    }
+};

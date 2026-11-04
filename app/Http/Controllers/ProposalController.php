@@ -74,7 +74,7 @@ class ProposalController extends Controller
     public function show(Proposal $proposal): View
     {
         Gate::authorize('view', $proposal);
-        $proposal->load(['grantPeriod.scheme', 'researchField', 'lead', 'members']);
+        $proposal->load(['grantPeriod.scheme', 'researchField', 'lead', 'members', 'decision.decider', 'reviewAssignments.reviewer']);
 
         return view('proposals.show', compact('proposal'));
     }
