@@ -12,7 +12,7 @@ class FundingContractPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin_uppm') || $user->hasRole('dosen');
+        return $user->hasRole('admin_uppm') || $user->hasRole('dosen') || $user->isStudent();
     }
 
     /**
@@ -20,7 +20,7 @@ class FundingContractPolicy
      */
     public function view(User $user, FundingContract $fundingContract): bool
     {
-        return $user->hasRole('admin_uppm') || $fundingContract->proposal->lead_id === $user->id;
+        return $fundingContract->proposal->isAccessibleBy($user);
     }
 
     /**

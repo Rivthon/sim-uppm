@@ -67,4 +67,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(ReviewAssignment::class, 'reviewer_id');
     }
+
+    public function proposalMemberships(): HasMany
+    {
+        return $this->hasMany(ProposalMember::class);
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->hasRole('mahasiswa');
+    }
+
+    public function hasActiveStudentAccess(): bool
+    {
+        if (! $this->isStudent()) {
+            return true;
+        }
+
+        return $this->proposalMemberships()->where('member_type', 'mahasiswa')->exists()
+            || (filled($this->identity_number) && ProposalMember::query()->where('member_type', 'mahasiswa')->where('identity_number', $this->identity_number)->exists());
+    }
 }

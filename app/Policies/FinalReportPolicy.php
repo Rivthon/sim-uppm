@@ -12,7 +12,7 @@ class FinalReportPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin_uppm') || $user->hasRole('dosen');
+        return $user->hasRole('admin_uppm') || $user->hasRole('dosen') || $user->isStudent();
     }
 
     /**
@@ -20,7 +20,7 @@ class FinalReportPolicy
      */
     public function view(User $user, FinalReport $finalReport): bool
     {
-        return $user->hasRole('admin_uppm') || $finalReport->contract->proposal->lead_id === $user->id;
+        return $finalReport->contract->proposal->isAccessibleBy($user);
     }
 
     /**

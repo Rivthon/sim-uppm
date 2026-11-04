@@ -12,7 +12,7 @@ class ResearchOutputPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin_uppm') || $user->hasRole('dosen');
+        return $user->hasRole('admin_uppm') || $user->hasRole('dosen') || $user->isStudent();
     }
 
     /**
@@ -20,7 +20,7 @@ class ResearchOutputPolicy
      */
     public function view(User $user, ResearchOutput $researchOutput): bool
     {
-        return $user->hasRole('admin_uppm') || $researchOutput->contract->proposal->lead_id === $user->id;
+        return $researchOutput->contract->proposal->isAccessibleBy($user);
     }
 
     /**

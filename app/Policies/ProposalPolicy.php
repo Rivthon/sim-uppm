@@ -12,7 +12,7 @@ class ProposalPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('dosen') || $user->hasRole('admin_uppm');
+        return $user->hasRole('dosen') || $user->hasRole('admin_uppm') || $user->isStudent();
     }
 
     /**
@@ -20,7 +20,7 @@ class ProposalPolicy
      */
     public function view(User $user, Proposal $proposal): bool
     {
-        return $user->hasRole('admin_uppm') || $proposal->lead_id === $user->id;
+        return $proposal->isAccessibleBy($user);
     }
 
     /**

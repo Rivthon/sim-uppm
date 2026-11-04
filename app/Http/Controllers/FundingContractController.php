@@ -22,7 +22,7 @@ class FundingContractController extends Controller
             ->with(['proposal:id,code,title,lead_id', 'proposal.lead:id,name'])
             ->withSum(['disbursements as paid_amount' => fn ($query) => $query->where('status', 'paid')], 'amount')
             ->when($request->filled('type'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->where('type', $request->string('type'))))
-            ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->whereBelongsTo(auth()->user(), 'lead')))
+            ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->accessibleTo(auth()->user())))
             ->latest('id')->paginate(10);
 
         return view('funding.index', compact('contracts'));

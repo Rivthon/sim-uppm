@@ -19,7 +19,7 @@ class ExecutionController extends Controller
             ->when($request->filled('type'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->where('type', $request->string('type'))))
             ->when(! $user->hasRole('admin_uppm'), function ($query) use ($user): void {
                 $query->where(function ($query) use ($user): void {
-                    $query->whereHas('proposal', fn ($proposal) => $proposal->whereBelongsTo($user, 'lead'))
+                    $query->whereHas('proposal', fn ($proposal) => $proposal->accessibleTo($user))
                         ->orWhereHas('evaluations', fn ($evaluation) => $evaluation->whereBelongsTo($user, 'evaluator'));
                 });
             })

@@ -114,6 +114,11 @@ class PasAuthenticator
             'roles' => collect($roles)
                 ->filter()
                 ->map(fn ($role) => Str::of((string) $role)->lower()->replace([' ', '-'], '_')->value())
+                ->map(fn (string $role): string => match ($role) {
+                    'student' => 'mahasiswa',
+                    'lecturer' => 'dosen',
+                    default => $role,
+                })
                 ->unique()
                 ->values()
                 ->all(),

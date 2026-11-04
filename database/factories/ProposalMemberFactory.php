@@ -20,6 +20,7 @@ class ProposalMemberFactory extends Factory
     {
         return [
             'proposal_id' => Proposal::factory(),
+            'user_id' => null,
             'name' => fake()->name(),
             'identity_number' => fake()->numerify('##########'),
             'member_type' => fake()->randomElement(['dosen', 'mahasiswa']),

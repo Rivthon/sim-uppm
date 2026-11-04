@@ -22,17 +22,17 @@ class DashboardController extends Controller
         $isAdmin = $user->hasRole('admin_uppm');
         $proposalQuery = Proposal::query()->whereYear('created_at', $year)
             ->when($type !== 'all', fn (Builder $query) => $query->where('type', $type))
-            ->when(! $isAdmin, fn (Builder $query) => $query->whereBelongsTo($user, 'lead'));
+            ->accessibleTo($user);
         $contractQuery = FundingContract::query()->whereYear('created_at', $year)
             ->when($type !== 'all', fn (Builder $query) => $query->whereHas('proposal', fn (Builder $proposal) => $proposal->where('type', $type)))
-            ->when(! $isAdmin, fn (Builder $query) => $query->whereHas('proposal', fn (Builder $proposal) => $proposal->whereBelongsTo($user, 'lead')));
+            ->when(! $isAdmin, fn (Builder $query) => $query->whereHas('proposal', fn (Builder $proposal) => $proposal->accessibleTo($user)));
         $outputQuery = ResearchOutput::query()->whereYear('created_at', $year)
             ->when($type !== 'all', fn (Builder $query) => $query->whereHas('contract.proposal', fn (Builder $proposal) => $proposal->where('type', $type)))
-            ->when(! $isAdmin, fn (Builder $query) => $query->whereHas('contract.proposal', fn (Builder $proposal) => $proposal->whereBelongsTo($user, 'lead')));
+            ->when(! $isAdmin, fn (Builder $query) => $query->whereHas('contract.proposal', fn (Builder $proposal) => $proposal->accessibleTo($user)));
 
         $paid = FundingDisbursement::query()->where('status', 'paid')->whereYear('paid_at', $year)
             ->when($type !== 'all', fn (Builder $query) => $query->whereHas('contract.proposal', fn (Builder $proposal) => $proposal->where('type', $type)))
-            ->when(! $isAdmin, fn (Builder $query) => $query->whereHas('contract.proposal', fn (Builder $proposal) => $proposal->whereBelongsTo($user, 'lead')))->sum('amount');
+            ->when(! $isAdmin, fn (Builder $query) => $query->whereHas('contract.proposal', fn (Builder $proposal) => $proposal->accessibleTo($user)))->sum('amount');
         $stats = ['proposals' => (clone $proposalQuery)->count(), 'submitted' => (clone $proposalQuery)->whereNot('status', 'draft')->count(),
             'active' => (clone $contractQuery)->whereIn('status', ['signed', 'active'])->count(), 'outputs' => (clone $outputQuery)->where('verification_status', 'verified')->count(),
             'funding' => (clone $contractQuery)->sum('contract_value'), 'paid' => $paid];

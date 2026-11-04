@@ -16,7 +16,7 @@ class FinalReportController extends Controller
         $contracts = FundingContract::query()
             ->with(['proposal.lead', 'finalReport', 'outputs'])
             ->when($request->filled('type'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->where('type', $request->string('type'))))
-            ->when(! $user->hasRole('admin_uppm'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->whereBelongsTo($user, 'lead')))
+            ->when(! $user->hasRole('admin_uppm'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->accessibleTo($user)))
             ->latest('id')->paginate(10);
 
         return view('reporting.index', compact('contracts'));
@@ -24,7 +24,7 @@ class FinalReportController extends Controller
 
     public function show(FundingContract $contract): View
     {
-        abort_unless(auth()->user()->hasRole('admin_uppm') || $contract->proposal->lead_id === auth()->id(), 403);
+        abort_unless($contract->proposal->isAccessibleBy(auth()->user()), 403);
         $contract->load(['proposal.lead', 'finalReport.submitter', 'outputs.creator', 'outputs.verifier']);
 
         return view('reporting.show', compact('contract'));

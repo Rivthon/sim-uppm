@@ -6,8 +6,7 @@
             <p class="nav-heading">Ruang kerja</p>
             <a href="{{ route('workspaces.show','penelitian') }}" class="nav-item workspace-nav research {{ request()->routeIs('workspaces.show') && request()->route('type') === 'penelitian' || request('type') === 'penelitian' ? 'active' : '' }}"><span>⌁</span>Penelitian & Pengembangan</a>
             <a href="{{ route('workspaces.show','pkm') }}" class="nav-item workspace-nav community {{ request()->routeIs('workspaces.show') && request()->route('type') === 'pkm' || request('type') === 'pkm' ? 'active' : '' }}"><span>♧</span>Pengabdian (PkM)</a>
-            <p class="nav-heading">Administrasi</p>
-            <a href="{{ route('master-data.index') }}" class="nav-item {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><span>◇</span>Master Data</a>
+            @if(auth()->user()->hasRole('admin_uppm'))<p class="nav-heading">Administrasi</p><a href="{{ route('master-data.index') }}" class="nav-item {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><span>◇</span>Master Data</a>@endif
         </nav>
         <div class="sidebar-user"><div class="avatar">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</div><div><strong>{{ auth()->user()->name }}</strong><span>{{ auth()->user()->roleLabel() }}</span></div></div>
     </aside>

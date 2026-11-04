@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\ProposalFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,6 +50,30 @@ class Proposal extends Model
     public function fundingContract(): HasOne
     {
         return $this->hasOne(FundingContract::class);
+    }
+
+    public function scopeAccessibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->hasRole('admin_uppm')) {
+            return $query;
+        }
+
+        if ($user->isStudent()) {
+            return $query->whereHas('members', fn (Builder $members) => $members
+                ->where('member_type', 'mahasiswa')
+                ->where(fn (Builder $identity) => $identity->whereBelongsTo($user)
+                    ->when(filled($user->identity_number), fn (Builder $matched) => $matched->orWhere('identity_number', $user->identity_number))));
+        }
+
+        return $query->whereBelongsTo($user, 'lead');
+    }
+
+    public function isAccessibleBy(User $user): bool
+    {
+        return $user->hasRole('admin_uppm') || $this->lead_id === $user->id
+            || ($user->isStudent() && $this->members()->where('member_type', 'mahasiswa')
+                ->where(fn (Builder $query) => $query->whereBelongsTo($user)
+                    ->when(filled($user->identity_number), fn (Builder $matched) => $matched->orWhere('identity_number', $user->identity_number)))->exists());
     }
 
     protected function casts(): array

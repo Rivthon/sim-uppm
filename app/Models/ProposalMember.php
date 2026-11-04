@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['proposal_id', 'name', 'identity_number', 'member_type', 'study_program', 'sort_order'])]
+#[Fillable(['proposal_id', 'user_id', 'name', 'identity_number', 'member_type', 'study_program', 'sort_order'])]
 class ProposalMember extends Model
 {
     /** @use HasFactory<ProposalMemberFactory> */
@@ -17,5 +17,10 @@ class ProposalMember extends Model
     public function proposal(): BelongsTo
     {
         return $this->belongsTo(Proposal::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

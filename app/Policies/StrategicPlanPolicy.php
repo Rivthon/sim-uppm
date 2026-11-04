@@ -12,7 +12,7 @@ class StrategicPlanPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin_uppm') || $user->hasRole('dosen') || $user->hasRole('reviewer');
+        return $user->hasRole('admin_uppm') || $user->hasRole('dosen') || $user->hasRole('reviewer') || $user->isStudent();
     }
 
     /**

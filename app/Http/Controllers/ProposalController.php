@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProposalRequest;
 use App\Models\GrantPeriod;
 use App\Models\Proposal;
 use App\Models\ResearchField;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ class ProposalController extends Controller
             ->with(['grantPeriod:id,name', 'researchField:id,name', 'lead:id,name,identity_number'])
             ->withCount('members')
             ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')))
-            ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->whereBelongsTo(auth()->user(), 'lead'))
+            ->accessibleTo(auth()->user())
             ->latest('id')
             ->paginate(10);
 
@@ -147,11 +148,18 @@ class ProposalController extends Controller
     /** @param array<int, array<string, mixed>> $members */
     private function replaceMembers(Proposal $proposal, array $members): void
     {
+        $studentIdentities = collect($members)->where('member_type', 'mahasiswa')->pluck('identity_number')->filter()->unique();
+        $studentUsers = User::query()->whereIn('identity_number', $studentIdentities)->get()
+            ->filter(fn (User $user): bool => $user->isStudent())->keyBy('identity_number');
         $proposal->members()->delete();
         $proposal->members()->createMany(collect($members)
             ->filter(fn (array $member): bool => filled($member['name'] ?? null))
             ->values()
-            ->map(fn (array $member, int $index): array => [...$member, 'sort_order' => $index])
+            ->map(fn (array $member, int $index): array => [
+                ...$member,
+                'user_id' => $member['member_type'] === 'mahasiswa' ? $studentUsers->get($member['identity_number'] ?? '')?->id : null,
+                'sort_order' => $index,
+            ])
             ->all());
     }
 }
