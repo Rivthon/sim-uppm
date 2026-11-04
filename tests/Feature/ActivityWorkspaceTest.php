@@ -14,12 +14,13 @@ class ActivityWorkspaceTest extends TestCase
     public function test_research_workspace_counts_only_research_proposals(): void
     {
         $admin = User::factory()->create(['roles' => ['admin_uppm']]);
+        $existingResearchProposals = Proposal::query()->where('type', 'penelitian')->count();
         Proposal::factory()->create(['type' => 'penelitian']);
         Proposal::factory()->create(['type' => 'pkm']);
 
         $this->actingAs($admin)->get(route('workspaces.show', 'penelitian'))
             ->assertOk()->assertSee('Penelitian &amp; Pengembangan', false)
-            ->assertViewHas('stats', fn (array $stats): bool => $stats['proposals'] === 1);
+            ->assertViewHas('stats', fn (array $stats): bool => $stats['proposals'] === $existingResearchProposals + 1);
     }
 
     public function test_pkm_workspace_counts_only_current_lecturers_pkm_proposals(): void

@@ -2,8 +2,10 @@
 
 namespace App\Services\Pas;
 
+use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -65,22 +67,41 @@ class PasAuthenticator
     /** @return array<string, mixed> */
     private function authenticateMock(string $username, string $password): array
     {
-        if (! app()->environment(['local', 'testing']) ||
-            ! hash_equals((string) config('services.pas.mock_username'), $username) ||
-            ! hash_equals((string) config('services.pas.mock_password'), $password)) {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new PasAuthenticationException('Username atau password PAS tidak sesuai.');
+        }
+
+        if (hash_equals((string) config('services.pas.mock_username'), $username) &&
+            hash_equals((string) config('services.pas.mock_password'), $password)) {
+            return [
+                'pas_user_id' => 'PAS-DEMO-001',
+                'username' => $username,
+                'name' => 'Administrator UPPM',
+                'email' => 'uppm@kampus.ac.id',
+                'identity_number' => 'UPPM001',
+                'unit' => 'Unit Penelitian dan Pengabdian kepada Masyarakat',
+                'study_program' => null,
+                'roles' => ['admin_uppm'],
+                'is_active' => true,
+            ];
+        }
+
+        $user = User::query()->where('username', $username)->first();
+
+        if (! $user || ! $user->password || ! Hash::check($password, $user->password)) {
             throw new PasAuthenticationException('Username atau password PAS tidak sesuai.');
         }
 
         return [
-            'pas_user_id' => 'PAS-DEMO-001',
-            'username' => $username,
-            'name' => 'Administrator UPPM',
-            'email' => 'uppm@kampus.ac.id',
-            'identity_number' => 'UPPM001',
-            'unit' => 'Unit Penelitian dan Pengabdian kepada Masyarakat',
-            'study_program' => null,
-            'roles' => ['admin_uppm'],
-            'is_active' => true,
+            'pas_user_id' => $user->pas_user_id,
+            'username' => $user->username,
+            'name' => $user->name,
+            'email' => $user->email,
+            'identity_number' => $user->identity_number,
+            'unit' => $user->unit,
+            'study_program' => $user->study_program,
+            'roles' => $user->roles,
+            'is_active' => $user->is_active,
         ];
     }
 

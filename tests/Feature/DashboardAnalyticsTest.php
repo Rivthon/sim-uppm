@@ -15,13 +15,15 @@ class DashboardAnalyticsTest extends TestCase
     public function test_admin_dashboard_uses_persisted_statistics(): void
     {
         $admin = User::factory()->create(['roles' => ['admin_uppm']]);
+        $existingProposals = Proposal::query()->whereYear('created_at', now()->year)->count();
+        $existingSubmittedProposals = Proposal::query()->whereYear('created_at', now()->year)->whereNotNull('submitted_at')->count();
         Proposal::factory()->submitted()->create(['code' => 'UPPM-'.now()->year.'-9001', 'type' => 'penelitian', 'created_at' => now()]);
         Proposal::factory()->submitted()->create(['code' => 'UPPM-'.now()->year.'-9002', 'type' => 'penelitian', 'created_at' => now()]);
         Proposal::factory()->create(['type' => 'pkm', 'created_at' => now()]);
 
         $response = $this->actingAs($admin)->get(route('dashboard', ['year' => now()->year, 'type' => 'all']));
 
-        $response->assertOk()->assertViewHas('stats', fn (array $stats): bool => $stats['proposals'] === 3 && $stats['submitted'] === 2);
+        $response->assertOk()->assertViewHas('stats', fn (array $stats): bool => $stats['proposals'] === $existingProposals + 3 && $stats['submitted'] === $existingSubmittedProposals + 2);
     }
 
     public function test_lecturer_dashboard_does_not_include_another_lecturers_proposal(): void

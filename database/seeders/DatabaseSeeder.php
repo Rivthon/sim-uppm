@@ -45,5 +45,7 @@ class DatabaseSeeder extends Seeder
                 ...$scheme, 'duration_months' => 12, 'is_active' => true,
             ]);
         }
+
+        $this->call(DummyUserSeeder::class);
     }
 }

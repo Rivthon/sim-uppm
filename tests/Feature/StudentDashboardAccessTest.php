@@ -7,6 +7,7 @@ use App\Models\ProposalMember;
 use App\Models\User;
 use App\Services\Pas\PasAuthenticator;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Hash;
 use Mockery;
 use Tests\TestCase;
 
@@ -102,6 +103,20 @@ class StudentDashboardAccessTest extends TestCase
         $student = User::query()->where('pas_user_id', 'PAS-SELECTED')->firstOrFail();
         $this->assertAuthenticatedAs($student);
         $this->assertSame($student->id, $membership->fresh()->user_id);
+    }
+
+    public function test_seeded_mock_user_can_login_with_local_password(): void
+    {
+        $lecturer = User::factory()->create([
+            'username' => 'dosen.demo',
+            'password' => Hash::make('password123'),
+            'roles' => ['dosen'],
+        ]);
+
+        $this->post(route('login.store'), ['username' => 'dosen.demo', 'password' => 'password123'])
+            ->assertRedirect(route('dashboard'));
+
+        $this->assertAuthenticatedAs($lecturer);
     }
 
     /** @return array<string, mixed> */
