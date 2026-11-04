@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterActivityTypeRequest;
 use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
 use App\Models\GrantPeriod;
@@ -19,13 +20,14 @@ class ProposalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(FilterActivityTypeRequest $request): View
     {
         Gate::authorize('viewAny', Proposal::class);
 
         $proposals = Proposal::query()
             ->with(['grantPeriod:id,name', 'researchField:id,name', 'lead:id,name,identity_number'])
             ->withCount('members')
+            ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')))
             ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->whereBelongsTo(auth()->user(), 'lead'))
             ->latest('id')
             ->paginate(10);
@@ -36,11 +38,11 @@ class ProposalController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(FilterActivityTypeRequest $request): View
     {
         Gate::authorize('create', Proposal::class);
 
-        return view('proposals.create', $this->formOptions());
+        return view('proposals.create', $this->formOptions($request->string('type')->toString() ?: null));
     }
 
     /**
@@ -132,10 +134,12 @@ class ProposalController extends Controller
     }
 
     /** @return array{grantPeriods: Collection<int, GrantPeriod>, researchFields: Collection<int, ResearchField>} */
-    private function formOptions(): array
+    private function formOptions(?string $type = null): array
     {
         return [
-            'grantPeriods' => GrantPeriod::query()->with('scheme:id,name,type,maximum_funding')->where('status', 'open')->orderBy('submission_ends_at')->get(),
+            'grantPeriods' => GrantPeriod::query()->with('scheme:id,name,type,maximum_funding')->where('status', 'open')
+                ->when($type, fn ($query) => $query->whereHas('scheme', fn ($scheme) => $scheme->where('type', $type)))
+                ->orderBy('submission_ends_at')->get(),
             'researchFields' => ResearchField::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']),
         ];
     }

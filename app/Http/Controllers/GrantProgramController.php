@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterActivityTypeRequest;
 use App\Http\Requests\StoreGrantPeriodRequest;
 use App\Http\Requests\UpdateGrantPeriodRequest;
 use App\Models\AcademicYear;
@@ -16,12 +17,13 @@ class GrantProgramController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(FilterActivityTypeRequest $request): View
     {
         abort_unless(auth()->user()->hasRole('admin_uppm'), 403);
 
         $periods = GrantPeriod::query()
             ->with(['academicYear:id,name', 'scheme:id,code,name,type'])
+            ->when($request->filled('type'), fn ($query) => $query->whereHas('scheme', fn ($scheme) => $scheme->where('type', $request->string('type'))))
             ->latest('submission_starts_at')
             ->latest('id')
             ->paginate(10);

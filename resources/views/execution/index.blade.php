@@ -2,7 +2,7 @@
 @section('title', 'Pelaksanaan & Monev')
 @section('body')
 <x-app-shell title="Pelaksanaan & Monev">
-    <div class="page-intro"><div><span class="eyebrow">KENDALI KEGIATAN</span><h2>Pelaksanaan penelitian dan PkM</h2><p>Pantau logbook, laporan kemajuan, dan hasil evaluasi setiap kontrak aktif.</p></div></div>
+    <div class="page-intro"><div><span class="eyebrow">KENDALI KEGIATAN</span><h2>Pelaksanaan {{ request('type')==='pkm'?'Pengabdian kepada Masyarakat':(request('type')==='penelitian'?'Penelitian & Pengembangan':'seluruh kegiatan') }}</h2><p>Pantau logbook, laporan kemajuan, dan hasil evaluasi setiap kontrak aktif.</p></div></div>
     <div class="execution-list">
         @forelse($contracts as $contract)
             <a class="execution-card" href="{{ route('execution.show', $contract) }}">

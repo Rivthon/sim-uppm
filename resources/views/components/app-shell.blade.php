@@ -3,13 +3,11 @@
         <div class="brand sidebar-brand"><div class="brand-mark">U</div><div><strong>SIM UPPM</strong><span>Kampus SBH</span></div></div>
         <nav class="nav-list">
             <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><span>⌂</span>Dashboard</a>@if(auth()->user()->hasRole('admin_uppm'))<a href="{{ route('accreditation.index') }}" class="nav-item {{ request()->routeIs('accreditation.*') ? 'active' : '' }}"><span>▤</span>Rekap Akreditasi</a>@endif
-            <p class="nav-heading">Perencanaan</p>
+            <p class="nav-heading">Ruang kerja</p>
+            <a href="{{ route('workspaces.show','penelitian') }}" class="nav-item workspace-nav research {{ request()->routeIs('workspaces.show') && request()->route('type') === 'penelitian' || request('type') === 'penelitian' ? 'active' : '' }}"><span>⌁</span>Penelitian & Pengembangan</a>
+            <a href="{{ route('workspaces.show','pkm') }}" class="nav-item workspace-nav community {{ request()->routeIs('workspaces.show') && request()->route('type') === 'pkm' || request('type') === 'pkm' ? 'active' : '' }}"><span>♧</span>Pengabdian (PkM)</a>
+            <p class="nav-heading">Administrasi</p>
             <a href="{{ route('master-data.index') }}" class="nav-item {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><span>◇</span>Master Data</a>
-            <a href="{{ route('strategic-plans.index') }}" class="nav-item {{ request()->routeIs('strategic-plans.*') ? 'active' : '' }}"><span>⌁</span>Renstra & Roadmap</a>
-            <p class="nav-heading">Program</p>
-            <a href="{{ route('grants.index') }}" class="nav-item {{ request()->routeIs('grants.*') ? 'active' : '' }}"><span>✦</span>Program & Hibah</a>
-            <a href="{{ route('proposals.index') }}" class="nav-item {{ request()->routeIs('proposals.*') ? 'active' : '' }}"><span>□</span>Proposal</a><a href="{{ route('reviews.index') }}" class="nav-item {{ request()->routeIs('reviews.*') ? 'active' : '' }}"><span>◎</span>Reviewer</a><a href="{{ route('funding.index') }}" class="nav-item {{ request()->routeIs('funding.*') ? 'active' : '' }}"><span>▱</span>Kontrak & Pendanaan</a>
-            <p class="nav-heading">Pelaksanaan</p><a href="{{ route('execution.index') }}" class="nav-item {{ request()->routeIs('execution.*') ? 'active' : '' }}"><span>↗</span>Pelaksanaan & Monev</a><a href="{{ route('reporting.index') }}" class="nav-item {{ request()->routeIs('reporting.*') ? 'active' : '' }}"><span>▥</span>Laporan & Luaran</a>
         </nav>
         <div class="sidebar-user"><div class="avatar">{{ str(auth()->user()->name)->substr(0, 1)->upper() }}</div><div><strong>{{ auth()->user()->name }}</strong><span>{{ auth()->user()->roleLabel() }}</span></div></div>
     </aside>

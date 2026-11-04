@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterActivityTypeRequest;
 use App\Http\Requests\StoreStrategicPlanRequest;
 use App\Http\Requests\UpdateStrategicPlanRequest;
 use App\Models\StrategicPlan;
@@ -13,10 +14,11 @@ use Illuminate\View\View;
 
 class StrategicPlanController extends Controller
 {
-    public function index(): View
+    public function index(FilterActivityTypeRequest $request): View
     {
         Gate::authorize('viewAny', StrategicPlan::class);
         $plans = StrategicPlan::query()->with(['studyProgram:id,code,name'])->withCount('milestones')
+            ->when($request->filled('type'), fn ($query) => $query->whereIn('type', [$request->string('type')->toString(), 'integrated']))
             ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->where('status', 'active'))
             ->orderByDesc('start_year')->paginate(10);
 

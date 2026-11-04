@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterActivityTypeRequest;
 use App\Models\FundingContract;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -9,12 +10,13 @@ use Illuminate\View\View;
 
 class ExecutionController extends Controller
 {
-    public function index(): View
+    public function index(FilterActivityTypeRequest $request): View
     {
         $user = auth()->user();
         $contracts = FundingContract::query()
             ->with(['proposal:id,code,title,lead_id', 'proposal.lead:id,name'])
             ->withCount(['activityLogs', 'progressReports', 'evaluations'])
+            ->when($request->filled('type'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->where('type', $request->string('type'))))
             ->when(! $user->hasRole('admin_uppm'), function ($query) use ($user): void {
                 $query->where(function ($query) use ($user): void {
                     $query->whereHas('proposal', fn ($proposal) => $proposal->whereBelongsTo($user, 'lead'))

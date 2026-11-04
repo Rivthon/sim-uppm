@@ -3,6 +3,7 @@
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AccreditationController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ActivityWorkspaceController;
 use App\Http\Controllers\Auth\PasLoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExecutionController;
@@ -45,6 +46,7 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/ruang-kerja/{type}', ActivityWorkspaceController::class)->whereIn('type', ['penelitian', 'pkm'])->name('workspaces.show');
     Route::post('/dashboard/kpi', [KpiTargetController::class, 'store'])->name('dashboard.kpi.store');
     Route::get('/rekap-akreditasi', [AccreditationController::class, 'index'])->name('accreditation.index');
     Route::get('/rekap-akreditasi/export', [AccreditationController::class, 'export'])->name('accreditation.export');

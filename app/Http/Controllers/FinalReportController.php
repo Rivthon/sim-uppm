@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterActivityTypeRequest;
 use App\Http\Requests\StoreFinalReportRequest;
 use App\Models\FundingContract;
 use Illuminate\Http\RedirectResponse;
@@ -9,11 +10,12 @@ use Illuminate\View\View;
 
 class FinalReportController extends Controller
 {
-    public function index(): View
+    public function index(FilterActivityTypeRequest $request): View
     {
         $user = auth()->user();
         $contracts = FundingContract::query()
             ->with(['proposal.lead', 'finalReport', 'outputs'])
+            ->when($request->filled('type'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->where('type', $request->string('type'))))
             ->when(! $user->hasRole('admin_uppm'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->whereBelongsTo($user, 'lead')))
             ->latest('id')->paginate(10);
 

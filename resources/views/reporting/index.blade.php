@@ -2,7 +2,7 @@
 @section('title', 'Laporan & Luaran')
 @section('body')
 <x-app-shell title="Laporan & Luaran">
-    <div class="page-intro"><div><span class="eyebrow">HASIL KEGIATAN</span><h2>Laporan akhir dan luaran</h2><p>Kelola dokumen akhir, publikasi, HKI, buku, produk, dan bukti capaian lainnya.</p></div></div>
+    <div class="page-intro"><div><span class="eyebrow">HASIL {{ request('type')==='pkm'?'PENGABDIAN':(request('type')==='penelitian'?'PENELITIAN':'KEGIATAN') }}</span><h2>Laporan akhir dan luaran {{ request('type')==='pkm'?'PkM':(request('type')==='penelitian'?'Penelitian & Pengembangan':'seluruh kegiatan') }}</h2><p>Kelola dokumen akhir, publikasi, HKI, buku, produk, dan bukti capaian lainnya.</p></div></div>
     <div class="execution-list">
         @forelse($contracts as $contract)
             <a class="execution-card" href="{{ route('reporting.show', $contract) }}">

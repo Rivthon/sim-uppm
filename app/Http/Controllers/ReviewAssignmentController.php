@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterActivityTypeRequest;
 use App\Http\Requests\StoreReviewAssignmentRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Models\Proposal;
@@ -16,12 +17,13 @@ class ReviewAssignmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(FilterActivityTypeRequest $request): View
     {
         Gate::authorize('viewAny', ReviewAssignment::class);
 
         $assignments = ReviewAssignment::query()
             ->with(['proposal:id,code,title,type,lead_id', 'proposal.lead:id,name', 'reviewer:id,name,identity_number'])
+            ->when($request->filled('type'), fn ($query) => $query->whereHas('proposal', fn ($proposal) => $proposal->where('type', $request->string('type'))))
             ->when(! auth()->user()->hasRole('admin_uppm'), fn ($query) => $query->whereBelongsTo(auth()->user(), 'reviewer'))
             ->orderByRaw("FIELD(status, 'assigned', 'in_review', 'submitted', 'conflict')")
             ->orderBy('due_at')
@@ -33,13 +35,14 @@ class ReviewAssignmentController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(FilterActivityTypeRequest $request): View
     {
         Gate::authorize('create', ReviewAssignment::class);
 
         $proposals = Proposal::query()
             ->with('lead:id,name')
             ->where('status', 'submitted')
+            ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')))
             ->latest('submitted_at')
             ->get(['id', 'code', 'title', 'lead_id']);
         $reviewers = User::query()->where('is_active', true)->orderBy('name')->get()
