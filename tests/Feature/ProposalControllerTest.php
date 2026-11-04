@@ -6,6 +6,7 @@ use App\Models\GrantPeriod;
 use App\Models\GrantScheme;
 use App\Models\Proposal;
 use App\Models\ResearchField;
+use App\Models\ReviewAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
@@ -50,6 +51,42 @@ class ProposalControllerTest extends TestCase
         $proposal = Proposal::factory()->for($owner, 'lead')->create();
 
         $this->actingAs($otherLecturer)->get(route('proposals.show', $proposal))->assertForbidden();
+    }
+
+    public function test_lecturer_sees_reviewer_identity_but_not_draft_review_content(): void
+    {
+        $lecturer = User::factory()->create(['roles' => ['dosen']]);
+        $reviewer = User::factory()->create(['roles' => ['reviewer'], 'name' => 'Dr. Reviewer Rahasia']);
+        $proposal = Proposal::factory()->submitted()->for($lecturer, 'lead')->create();
+        ReviewAssignment::factory()->for($proposal)->for($reviewer, 'reviewer')->create([
+            'status' => 'in_review',
+            'comments' => 'DRAFT RAHASIA REVIEWER',
+        ]);
+
+        $this->actingAs($lecturer)->get(route('proposals.show', $proposal))
+            ->assertOk()
+            ->assertSee($reviewer->name)
+            ->assertSee('Sedang direview')
+            ->assertSee('penilaian masih berlangsung')
+            ->assertDontSee('DRAFT RAHASIA REVIEWER');
+    }
+
+    public function test_lecturer_sees_complete_review_after_reviewer_submits_it(): void
+    {
+        $lecturer = User::factory()->create(['roles' => ['dosen']]);
+        $proposal = Proposal::factory()->submitted()->for($lecturer, 'lead')->create();
+        $assignment = ReviewAssignment::factory()->submitted()->for($proposal)->create([
+            'comments' => 'Catatan akhir yang dapat dibaca dosen.',
+        ]);
+
+        $this->actingAs($lecturer)->get(route('proposals.show', $proposal))
+            ->assertOk()
+            ->assertSee('Review selesai')
+            ->assertSee('84/100')
+            ->assertSee($assignment->strengths)
+            ->assertSee($assignment->weaknesses)
+            ->assertSee($assignment->comments)
+            ->assertSee('Revisi');
     }
 
     public function test_rejects_requested_budget_above_scheme_limit(): void

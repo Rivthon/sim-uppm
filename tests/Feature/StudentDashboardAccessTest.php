@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Proposal;
 use App\Models\ProposalMember;
+use App\Models\ReviewAssignment;
 use App\Models\User;
 use App\Services\Pas\PasAuthenticator;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -65,8 +66,13 @@ class StudentDashboardAccessTest extends TestCase
             'identity_number' => $student->identity_number,
             'member_type' => 'mahasiswa',
         ]);
+        ReviewAssignment::factory()->submitted()->for($proposal)->create([
+            'comments' => 'HASIL REVIEW KHUSUS DOSEN',
+        ]);
 
-        $this->actingAs($student)->get(route('proposals.show', $proposal))->assertOk();
+        $this->actingAs($student)->get(route('proposals.show', $proposal))
+            ->assertOk()
+            ->assertDontSee('HASIL REVIEW KHUSUS DOSEN');
         $this->actingAs($student)->get(route('proposals.create'))->assertForbidden();
         $this->actingAs($student)->get(route('proposals.edit', $proposal))->assertForbidden();
     }

@@ -10,6 +10,9 @@
  @can('update',$proposal)<a class="primary-link block-link" href="{{ route('proposals.edit', $proposal) }}">Edit draft</a>@endcan
  @can('submit',$proposal)<form method="POST" action="{{ route('proposals.submissions.store', $proposal) }}" onsubmit="return confirm('Ajukan proposal? Setelah diajukan, proposal tidak dapat diedit.')">@csrf<button class="submit-proposal" type="submit">Ajukan ke UPPM →</button></form>@endcan
  </aside></div>
+ @if($proposal->lead_id === auth()->id())
+    @include('proposals._review-progress', ['assignments' => $proposal->reviewAssignments])
+ @endif
  @if(auth()->user()->hasRole('admin_uppm') && $proposal->status === 'submitted')
  <section class="assign-reviewer-panel">
     <div class="assign-reviewer-heading"><div><span class="eyebrow eyebrow-dark">Langkah admin</span><h3>Assign reviewer langsung</h3><p>Data proposal sudah terbaca lengkap. Pilih reviewer dan tenggat untuk meneruskan pengajuan ke proses penilaian.</p></div><span class="step-badge">1 klik simpan</span></div>
