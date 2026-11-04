@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\PasLoginController;
 use App\Http\Controllers\DashboardController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\FundingContractController;
 use App\Http\Controllers\FundingDisbursementController;
 use App\Http\Controllers\FundingDocumentController;
 use App\Http\Controllers\GrantProgramController;
+use App\Http\Controllers\GrantSchemeController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\MonitoringEvaluationController;
 use App\Http\Controllers\OutputVerificationController;
@@ -20,9 +22,11 @@ use App\Http\Controllers\ProposalDecisionController;
 use App\Http\Controllers\ProposalDocumentController;
 use App\Http\Controllers\ProposalSubmissionController;
 use App\Http\Controllers\ReportingDocumentController;
+use App\Http\Controllers\ResearchFieldController;
 use App\Http\Controllers\ResearchOutputController;
 use App\Http\Controllers\ReviewAssignmentController;
 use App\Http\Controllers\ReviewSubmissionController;
+use App\Http\Controllers\StudyProgramController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -37,6 +41,10 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');
+    Route::resource('/master-data/program-studi', StudyProgramController::class)->only(['store', 'update', 'destroy'])->parameters(['program-studi' => 'study_program'])->names('master-data.study-programs');
+    Route::resource('/master-data/tahun-akademik', AcademicYearController::class)->only(['store', 'update', 'destroy'])->parameters(['tahun-akademik' => 'academic_year'])->names('master-data.academic-years');
+    Route::resource('/master-data/bidang-ilmu', ResearchFieldController::class)->only(['store', 'update', 'destroy'])->parameters(['bidang-ilmu' => 'research_field'])->names('master-data.research-fields');
+    Route::resource('/master-data/skema-hibah', GrantSchemeController::class)->only(['store', 'update', 'destroy'])->parameters(['skema-hibah' => 'grant_scheme'])->names('master-data.grant-schemes');
     Route::resource('/program-hibah', GrantProgramController::class)->parameters(['program-hibah' => 'grant'])->names('grants');
     Route::resource('/proposal', ProposalController::class)->parameters(['proposal' => 'proposal'])->names('proposals');
     Route::post('/proposal/{proposal}/pengajuan', [ProposalSubmissionController::class, 'store'])->name('proposals.submissions.store');
