@@ -5,7 +5,7 @@
             <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><span>⌂</span>Dashboard</a>@if(auth()->user()->hasRole('admin_uppm'))<a href="{{ route('accreditation.index') }}" class="nav-item {{ request()->routeIs('accreditation.*') ? 'active' : '' }}"><span>▤</span>Rekap Akreditasi</a>@endif
             <p class="nav-heading">Perencanaan</p>
             <a href="{{ route('master-data.index') }}" class="nav-item {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><span>◇</span>Master Data</a>
-            <a href="#" class="nav-item"><span>⌁</span>Renstra & Roadmap</a>
+            <a href="{{ route('strategic-plans.index') }}" class="nav-item {{ request()->routeIs('strategic-plans.*') ? 'active' : '' }}"><span>⌁</span>Renstra & Roadmap</a>
             <p class="nav-heading">Program</p>
             <a href="{{ route('grants.index') }}" class="nav-item {{ request()->routeIs('grants.*') ? 'active' : '' }}"><span>✦</span>Program & Hibah</a>
             <a href="{{ route('proposals.index') }}" class="nav-item {{ request()->routeIs('proposals.*') ? 'active' : '' }}"><span>□</span>Proposal</a><a href="{{ route('reviews.index') }}" class="nav-item {{ request()->routeIs('reviews.*') ? 'active' : '' }}"><span>◎</span>Reviewer</a><a href="{{ route('funding.index') }}" class="nav-item {{ request()->routeIs('funding.*') ? 'active' : '' }}"><span>▱</span>Kontrak & Pendanaan</a>

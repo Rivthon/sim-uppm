@@ -28,6 +28,9 @@ use App\Http\Controllers\ResearchFieldController;
 use App\Http\Controllers\ResearchOutputController;
 use App\Http\Controllers\ReviewAssignmentController;
 use App\Http\Controllers\ReviewSubmissionController;
+use App\Http\Controllers\RoadmapMilestoneController;
+use App\Http\Controllers\StrategicPlanController;
+use App\Http\Controllers\StrategicPlanDocumentController;
 use App\Http\Controllers\StudyProgramController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +49,11 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/rekap-akreditasi', [AccreditationController::class, 'index'])->name('accreditation.index');
     Route::get('/rekap-akreditasi/export', [AccreditationController::class, 'export'])->name('accreditation.export');
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');
+    Route::resource('/renstra-roadmap', StrategicPlanController::class)->parameters(['renstra-roadmap' => 'strategic_plan'])->names('strategic-plans');
+    Route::post('/renstra-roadmap/{strategic_plan}/milestone', [RoadmapMilestoneController::class, 'store'])->name('strategic-plans.milestones.store');
+    Route::put('/roadmap-milestone/{milestone}', [RoadmapMilestoneController::class, 'update'])->name('strategic-plans.milestones.update');
+    Route::delete('/roadmap-milestone/{milestone}', [RoadmapMilestoneController::class, 'destroy'])->name('strategic-plans.milestones.destroy');
+    Route::get('/renstra-roadmap/{strategic_plan}/dokumen', StrategicPlanDocumentController::class)->name('strategic-plans.document');
     Route::resource('/master-data/program-studi', StudyProgramController::class)->only(['store', 'update', 'destroy'])->parameters(['program-studi' => 'study_program'])->names('master-data.study-programs');
     Route::resource('/master-data/tahun-akademik', AcademicYearController::class)->only(['store', 'update', 'destroy'])->parameters(['tahun-akademik' => 'academic_year'])->names('master-data.academic-years');
     Route::resource('/master-data/bidang-ilmu', ResearchFieldController::class)->only(['store', 'update', 'destroy'])->parameters(['bidang-ilmu' => 'research_field'])->names('master-data.research-fields');
