@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['proposal_id', 'contract_number', 'decree_number', 'signed_at', 'starts_at', 'ends_at', 'contract_value', 'status', 'document_path', 'created_by'])]
 class FundingContract extends Model
@@ -43,6 +44,16 @@ class FundingContract extends Model
     public function evaluations(): HasMany
     {
         return $this->hasMany(MonitoringEvaluation::class)->orderByDesc('scheduled_at');
+    }
+
+    public function finalReport(): HasOne
+    {
+        return $this->hasOne(FinalReport::class);
+    }
+
+    public function outputs(): HasMany
+    {
+        return $this->hasMany(ResearchOutput::class)->latest();
     }
 
     protected function casts(): array
