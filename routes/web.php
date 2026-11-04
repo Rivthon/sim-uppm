@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AccreditationController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\PasLoginController;
 use App\Http\Controllers\DashboardController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\FundingDisbursementController;
 use App\Http\Controllers\FundingDocumentController;
 use App\Http\Controllers\GrantProgramController;
 use App\Http\Controllers\GrantSchemeController;
+use App\Http\Controllers\KpiTargetController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\MonitoringEvaluationController;
 use App\Http\Controllers\OutputVerificationController;
@@ -40,6 +42,9 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::post('/dashboard/kpi', [KpiTargetController::class, 'store'])->name('dashboard.kpi.store');
+    Route::get('/rekap-akreditasi', [AccreditationController::class, 'index'])->name('accreditation.index');
+    Route::get('/rekap-akreditasi/export', [AccreditationController::class, 'export'])->name('accreditation.export');
     Route::get('/master-data', MasterDataController::class)->name('master-data.index');
     Route::resource('/master-data/program-studi', StudyProgramController::class)->only(['store', 'update', 'destroy'])->parameters(['program-studi' => 'study_program'])->names('master-data.study-programs');
     Route::resource('/master-data/tahun-akademik', AcademicYearController::class)->only(['store', 'update', 'destroy'])->parameters(['tahun-akademik' => 'academic_year'])->names('master-data.academic-years');

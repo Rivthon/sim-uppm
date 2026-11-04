@@ -2,7 +2,7 @@
     <aside class="sidebar" data-sidebar>
         <div class="brand sidebar-brand"><div class="brand-mark">U</div><div><strong>SIM UPPM</strong><span>Kampus SBH</span></div></div>
         <nav class="nav-list">
-            <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><span>⌂</span>Dashboard</a>
+            <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><span>⌂</span>Dashboard</a>@if(auth()->user()->hasRole('admin_uppm'))<a href="{{ route('accreditation.index') }}" class="nav-item {{ request()->routeIs('accreditation.*') ? 'active' : '' }}"><span>▤</span>Rekap Akreditasi</a>@endif
             <p class="nav-heading">Perencanaan</p>
             <a href="{{ route('master-data.index') }}" class="nav-item {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><span>◇</span>Master Data</a>
             <a href="#" class="nav-item"><span>⌁</span>Renstra & Roadmap</a>
