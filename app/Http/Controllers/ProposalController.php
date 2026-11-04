@@ -78,8 +78,20 @@ class ProposalController extends Controller
     {
         Gate::authorize('view', $proposal);
         $proposal->load(['grantPeriod.scheme', 'researchField', 'lead', 'members', 'decision.decider', 'reviewAssignments.reviewer']);
+        $reviewers = collect();
 
-        return view('proposals.show', compact('proposal'));
+        if (auth()->user()->hasRole('admin_uppm') && $proposal->status === 'submitted') {
+            $assignedReviewerIds = $proposal->reviewAssignments->pluck('reviewer_id');
+            $reviewers = User::query()
+                ->where('is_active', true)
+                ->whereJsonContains('roles', 'reviewer')
+                ->whereKeyNot($proposal->lead_id)
+                ->whereNotIn('id', $assignedReviewerIds)
+                ->orderBy('name')
+                ->get(['id', 'name', 'identity_number', 'username']);
+        }
+
+        return view('proposals.show', compact('proposal', 'reviewers'));
     }
 
     /**

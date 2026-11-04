@@ -36,6 +36,7 @@ class StoreReviewAssignmentRequest extends FormRequest
                 Rule::unique('review_assignments')->where(fn ($query) => $query->where('proposal_id', $this->integer('proposal_id'))),
             ],
             'due_at' => ['required', 'date', 'after:today'],
+            'return_to_proposal' => ['sometimes', 'boolean'],
         ];
     }
 

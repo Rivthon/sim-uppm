@@ -57,10 +57,15 @@ class ReviewAssignmentController extends Controller
     public function store(StoreReviewAssignmentRequest $request): RedirectResponse
     {
         $assignment = ReviewAssignment::create([
-            ...$request->validated(),
+            ...$request->safe()->except('return_to_proposal'),
             'assigned_by' => $request->user()->id,
             'status' => 'assigned',
         ]);
+
+        if ($request->boolean('return_to_proposal')) {
+            return redirect()->route('proposals.show', $assignment->proposal_id)
+                ->with('success', 'Reviewer berhasil ditugaskan. Proposal kini masuk proses review.');
+        }
 
         return redirect()->route('reviews.show', $assignment)->with('success', 'Reviewer berhasil ditugaskan.');
     }

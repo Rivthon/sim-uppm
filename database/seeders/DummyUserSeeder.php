@@ -21,7 +21,7 @@ class DummyUserSeeder extends Seeder
         $lecturers = collect([
             ['pas_user_id' => 'PAS-DOSEN-001', 'username' => 'dosen1', 'name' => 'Dr. Andi Saputra', 'email' => 'dosen1@kampus.test', 'identity_number' => '0123456701', 'study_program' => 'Teknik Informatika'],
             ['pas_user_id' => 'PAS-DOSEN-002', 'username' => 'dosen2', 'name' => 'Dr. Siti Rahma', 'email' => 'dosen2@kampus.test', 'identity_number' => '0123456702', 'study_program' => 'Sistem Informasi'],
-        ])->map(fn (array $attributes): User => $this->createUser($attributes, ['dosen']));
+        ])->map(fn (array $attributes): User => $this->createUser($attributes, ['dosen', 'reviewer']));
 
         $students = collect([
             ['pas_user_id' => 'PAS-MHS-001', 'username' => 'mahasiswa1', 'name' => 'Budi Santoso', 'email' => 'mahasiswa1@kampus.test', 'identity_number' => '20260001', 'study_program' => 'Teknik Informatika'],

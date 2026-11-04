@@ -15,6 +15,7 @@ use App\Http\Controllers\FundingDisbursementController;
 use App\Http\Controllers\FundingDocumentController;
 use App\Http\Controllers\GrantProgramController;
 use App\Http\Controllers\GrantSchemeController;
+use App\Http\Controllers\IncomingProposalController;
 use App\Http\Controllers\KpiTargetController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\MonitoringEvaluationController;
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'authorized.pas'])->group(function (): void {
     Route::resource('/master-data/skema-hibah', GrantSchemeController::class)->only(['store', 'update', 'destroy'])->parameters(['skema-hibah' => 'grant_scheme'])->names('master-data.grant-schemes');
     Route::resource('/program-hibah', GrantProgramController::class)->parameters(['program-hibah' => 'grant'])->names('grants');
     Route::resource('/proposal', ProposalController::class)->parameters(['proposal' => 'proposal'])->names('proposals');
+    Route::get('/pengajuan-masuk', IncomingProposalController::class)->name('incoming-proposals.index');
     Route::post('/proposal/{proposal}/pengajuan', [ProposalSubmissionController::class, 'store'])->name('proposals.submissions.store');
     Route::get('/proposal/{proposal}/dokumen', ProposalDocumentController::class)->name('proposals.documents.show');
     Route::resource('/review', ReviewAssignmentController::class)->parameters(['review' => 'assignment'])->names('reviews');
