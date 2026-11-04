@@ -68,7 +68,7 @@ class ProposalControllerTest extends TestCase
         $this->assertDatabaseMissing('proposals', ['title' => 'Sistem Monitoring Penelitian Terintegrasi']);
     }
 
-    public function test_create_displays_readable_indonesian_minimum_length_message(): void
+    public function test_create_accepts_short_proposal_content(): void
     {
         $lecturer = User::factory()->create(['roles' => ['dosen']]);
         $scheme = GrantScheme::factory()->create(['maximum_funding' => 15000000]);
@@ -79,12 +79,14 @@ class ProposalControllerTest extends TestCase
             'abstract' => 'Terlalu singkat.',
         ]));
 
-        $response->assertSessionHasErrors([
-            'abstract' => 'abstrak minimal harus terdiri dari 100 karakter.',
+        $response->assertSessionDoesntHaveErrors(['abstract']);
+        $this->assertDatabaseHas('proposals', [
+            'lead_id' => $lecturer->id,
+            'abstract' => 'Terlalu singkat.',
         ]);
     }
 
-    public function test_edit_displays_readable_indonesian_minimum_length_message(): void
+    public function test_edit_accepts_short_proposal_content(): void
     {
         $lecturer = User::factory()->create(['roles' => ['dosen']]);
         $scheme = GrantScheme::factory()->create(['maximum_funding' => 15000000]);
@@ -100,9 +102,8 @@ class ProposalControllerTest extends TestCase
             'methodology' => 'Terlalu singkat.',
         ]));
 
-        $response->assertSessionHasErrors([
-            'methodology' => 'metode pelaksanaan minimal harus terdiri dari 100 karakter.',
-        ]);
+        $response->assertSessionDoesntHaveErrors(['methodology']);
+        $this->assertSame('Terlalu singkat.', $proposal->fresh()->methodology);
     }
 
     /** @param array<string, mixed> $overrides
