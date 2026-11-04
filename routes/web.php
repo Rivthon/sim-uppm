@@ -15,6 +15,7 @@ use App\Http\Controllers\FundingDisbursementController;
 use App\Http\Controllers\FundingDocumentController;
 use App\Http\Controllers\GrantProgramController;
 use App\Http\Controllers\GrantSchemeController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IncomingProposalController;
 use App\Http\Controllers\KpiTargetController;
 use App\Http\Controllers\MasterDataController;
@@ -31,12 +32,13 @@ use App\Http\Controllers\ResearchOutputController;
 use App\Http\Controllers\ReviewAssignmentController;
 use App\Http\Controllers\ReviewSubmissionController;
 use App\Http\Controllers\RoadmapMilestoneController;
+use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\StrategicPlanController;
 use App\Http\Controllers\StrategicPlanDocumentController;
 use App\Http\Controllers\StudyProgramController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/dashboard');
+Route::get('/', HomeController::class)->name('home');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [PasLoginController::class, 'create'])->name('login');
@@ -47,6 +49,8 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware(['auth', 'authorized.pas'])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/pengaturan-website', [SiteSettingController::class, 'edit'])->name('site-settings.edit');
+    Route::put('/pengaturan-website', [SiteSettingController::class, 'update'])->name('site-settings.update');
     Route::get('/ruang-kerja/{type}', ActivityWorkspaceController::class)->whereIn('type', ['penelitian', 'pkm'])->name('workspaces.show');
     Route::post('/dashboard/kpi', [KpiTargetController::class, 'store'])->name('dashboard.kpi.store');
     Route::get('/rekap-akreditasi', [AccreditationController::class, 'index'])->name('accreditation.index');

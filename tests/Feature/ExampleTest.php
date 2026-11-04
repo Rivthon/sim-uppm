@@ -9,9 +9,9 @@ class ExampleTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_guest_is_redirected_to_login(): void
+    public function test_guest_can_open_home_and_protected_dashboard_redirects_to_login(): void
     {
-        $this->get('/')->assertRedirect('/dashboard');
+        $this->get('/')->assertOk()->assertSee('Masuk Portal');
         $this->get('/dashboard')->assertRedirect('/login');
         $this->get('/login')->assertOk()->assertSee('Masuk dengan akun PAS');
     }

@@ -47,5 +47,6 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call(DummyUserSeeder::class);
+        $this->call(SiteSettingSeeder::class);
     }
 }

@@ -12,6 +12,7 @@
                 <p class="nav-heading">Perencanaan & data</p>
                 <a href="{{ route('strategic-plans.index') }}" class="nav-item {{ request()->routeIs('strategic-plans.*') ? 'active' : '' }}"><span>◇</span>Renstra & Roadmap</a>
                 <a href="{{ route('master-data.index') }}" class="nav-item {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><span>≡</span>Master Data</a>
+                <a href="{{ route('site-settings.edit') }}" class="nav-item {{ request()->routeIs('site-settings.*') ? 'active' : '' }}"><span>⚙</span>Pengaturan Website</a>
                 <a href="{{ route('accreditation.index') }}" class="nav-item {{ request()->routeIs('accreditation.*') ? 'active' : '' }}"><span>▤</span>Rekap Akreditasi</a>
             @else
                 <p class="nav-heading">Pengajuan saya</p>
