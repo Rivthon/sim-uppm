@@ -27,6 +27,7 @@ use App\Http\Controllers\ProposalDecisionController;
 use App\Http\Controllers\ProposalDocumentController;
 use App\Http\Controllers\ProposalSubmissionController;
 use App\Http\Controllers\PublicPageController;
+use App\Http\Controllers\PublicPageImageController;
 use App\Http\Controllers\ReportingDocumentController;
 use App\Http\Controllers\ResearchFieldController;
 use App\Http\Controllers\ResearchOutputController;
@@ -55,6 +56,8 @@ Route::middleware(['auth', 'authorized.pas'])->group(function (): void {
     Route::put('/pengaturan-website', [SiteSettingController::class, 'update'])->name('site-settings.update');
     Route::resource('/pengaturan-website/halaman', PublicPageController::class)
         ->except('show')->parameters(['halaman' => 'public_page'])->names('public-pages');
+    Route::post('/pengaturan-website/halaman-gambar', PublicPageImageController::class)
+        ->middleware('throttle:30,1')->name('public-pages.images.store');
     Route::get('/ruang-kerja/{type}', ActivityWorkspaceController::class)->whereIn('type', ['penelitian', 'pkm'])->name('workspaces.show');
     Route::post('/dashboard/kpi', [KpiTargetController::class, 'store'])->name('dashboard.kpi.store');
     Route::get('/rekap-akreditasi', [AccreditationController::class, 'index'])->name('accreditation.index');

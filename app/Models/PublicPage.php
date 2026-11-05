@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['parent_id', 'title', 'slug', 'summary', 'content', 'sort_order', 'is_published', 'updated_by'])]
+#[Fillable(['parent_id', 'title', 'slug', 'summary', 'featured_image_path', 'content', 'sort_order', 'is_published', 'updated_by'])]
 class PublicPage extends Model
 {
     /** @use HasFactory<PublicPageFactory> */

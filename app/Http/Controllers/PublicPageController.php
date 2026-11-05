@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SavePublicPageRequest;
 use App\Models\PublicPage;
 use App\Models\SiteSetting;
+use App\Support\SanitizePublicPageHtml;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PublicPageController extends Controller
@@ -27,10 +29,13 @@ class PublicPageController extends Controller
         return view('public-pages.create', ['parents' => $this->parentOptions()]);
     }
 
-    public function store(SavePublicPageRequest $request): RedirectResponse
+    public function store(SavePublicPageRequest $request, SanitizePublicPageHtml $sanitizeHtml): RedirectResponse
     {
+        $data = $request->safe()->except(['is_published', 'featured_image', 'remove_featured_image']);
         $page = PublicPage::create([
-            ...$request->safe()->except('is_published'),
+            ...$data,
+            'content' => $sanitizeHtml($request->string('content')->toString()),
+            'featured_image_path' => $request->file('featured_image')?->store('public-pages/covers', 'public'),
             'is_published' => $request->boolean('is_published'),
             'updated_by' => $request->user()->id,
         ]);
@@ -38,7 +43,7 @@ class PublicPageController extends Controller
         return redirect()->route('public-pages.edit', $page)->with('success', 'Halaman publik berhasil dibuat.');
     }
 
-    public function show(PublicPage $publicPage): View
+    public function show(PublicPage $publicPage, SanitizePublicPageHtml $sanitizeHtml): View
     {
         abort_unless($publicPage->is_published || auth()->user()?->hasRole('admin_uppm'), 404);
         $publicPage->load([
@@ -50,8 +55,9 @@ class PublicPageController extends Controller
         $menuPages = PublicPage::query()->whereNull('parent_id')->where('is_published', true)
             ->with(['children' => fn ($query) => $query->where('is_published', true)])
             ->orderBy('sort_order')->orderBy('title')->get();
+        $sanitizedContent = $sanitizeHtml($publicPage->content);
 
-        return view('public-pages.show', compact('publicPage', 'settings', 'menuPages'));
+        return view('public-pages.show', compact('publicPage', 'settings', 'menuPages', 'sanitizedContent'));
     }
 
     public function edit(PublicPage $publicPage): View
@@ -61,10 +67,26 @@ class PublicPageController extends Controller
         return view('public-pages.edit', ['publicPage' => $publicPage, 'parents' => $this->parentOptions($publicPage)]);
     }
 
-    public function update(SavePublicPageRequest $request, PublicPage $publicPage): RedirectResponse
+    public function update(SavePublicPageRequest $request, PublicPage $publicPage, SanitizePublicPageHtml $sanitizeHtml): RedirectResponse
     {
+        $data = $request->safe()->except(['is_published', 'featured_image', 'remove_featured_image']);
+        $featuredImagePath = $publicPage->featured_image_path;
+
+        if ($request->boolean('remove_featured_image') || $request->hasFile('featured_image')) {
+            if ($featuredImagePath) {
+                Storage::disk('public')->delete($featuredImagePath);
+            }
+            $featuredImagePath = null;
+        }
+
+        if ($request->hasFile('featured_image')) {
+            $featuredImagePath = $request->file('featured_image')->store('public-pages/covers', 'public');
+        }
+
         $publicPage->update([
-            ...$request->safe()->except('is_published'),
+            ...$data,
+            'content' => $sanitizeHtml($request->string('content')->toString()),
+            'featured_image_path' => $featuredImagePath,
             'is_published' => $request->boolean('is_published'),
             'updated_by' => $request->user()->id,
         ]);
@@ -75,6 +97,9 @@ class PublicPageController extends Controller
     public function destroy(PublicPage $publicPage): RedirectResponse
     {
         abort_unless(auth()->user()->hasRole('admin_uppm'), 403);
+        if ($publicPage->featured_image_path) {
+            Storage::disk('public')->delete($publicPage->featured_image_path);
+        }
         $publicPage->delete();
 
         return redirect()->route('public-pages.index')->with('success', 'Halaman publik berhasil dihapus.');

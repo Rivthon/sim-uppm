@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\PublicPage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PublicPageManagementTest extends TestCase
@@ -58,6 +60,55 @@ class PublicPageManagementTest extends TestCase
         $this->actingAs($lecturer)->get(route('public-pages.index'))->assertForbidden();
         $this->actingAs($lecturer)->post(route('public-pages.store'), $this->validPayload())->assertForbidden();
         $this->actingAs($lecturer)->delete(route('public-pages.destroy', $page))->assertForbidden();
+    }
+
+    public function test_admin_can_upload_an_editor_image(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['roles' => ['admin_uppm']]);
+
+        $response = $this->actingAs($admin)->postJson(route('public-pages.images.store'), [
+            'image' => UploadedFile::fake()->image('kegiatan-uppm.jpg', 1200, 800),
+        ]);
+
+        $response->assertOk()->assertJsonStructure(['url']);
+        $path = str($response->json('url'))->after('/storage/')->toString();
+        Storage::disk('public')->assertExists($path);
+    }
+
+    public function test_cover_image_is_stored_and_rich_content_is_sanitized(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['roles' => ['admin_uppm']]);
+        $payload = $this->validPayload([
+            'slug' => 'halaman-kaya-visual',
+            'featured_image' => UploadedFile::fake()->image('sampul.webp', 1200, 800),
+            'content' => '<h2>Judul aman</h2><div><script>alert("bahaya")</script></div><p onclick="bahaya()"><strong>Isi tebal</strong></p>',
+        ]);
+
+        $this->actingAs($admin)->post(route('public-pages.store'), $payload)->assertRedirect();
+
+        $page = PublicPage::query()->where('slug', 'halaman-kaya-visual')->firstOrFail();
+        Storage::disk('public')->assertExists($page->featured_image_path);
+        $this->assertStringContainsString('<h2>Judul aman</h2>', $page->content);
+        $this->assertStringContainsString('<strong>Isi tebal</strong>', $page->content);
+        $this->assertStringNotContainsString('<script', $page->content);
+        $this->assertStringNotContainsString('onclick', $page->content);
+
+        $this->get(route('public-pages.show', $page))
+            ->assertOk()
+            ->assertSee('<h2>Judul aman</h2>', false)
+            ->assertDontSee('<script', false);
+    }
+
+    public function test_non_admin_cannot_upload_an_editor_image(): void
+    {
+        Storage::fake('public');
+        $lecturer = User::factory()->create(['roles' => ['dosen']]);
+
+        $this->actingAs($lecturer)->postJson(route('public-pages.images.store'), [
+            'image' => UploadedFile::fake()->image('tidak-diizinkan.jpg'),
+        ])->assertForbidden();
     }
 
     /** @param array<string, mixed> $overrides
