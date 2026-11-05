@@ -21,6 +21,7 @@ use Illuminate\Notifications\Notifiable;
     'study_program',
     'roles',
     'account_source',
+    'pas_password_changed',
     'is_active',
     'pas_synced_at',
 ])]
@@ -41,6 +42,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'roles' => 'array',
             'is_active' => 'boolean',
+            'pas_password_changed' => 'boolean',
             'pas_synced_at' => 'datetime',
             'password' => 'hashed',
         ];

@@ -86,7 +86,13 @@ class PasAuthenticator
             ];
         }
 
-        $user = User::query()->where('username', $username)->first();
+        $user = User::query()
+            ->where('username', $username)
+            ->orWhere(function ($query) use ($username): void {
+                $query->where('pas_password_changed', true)
+                    ->where('identity_number', $username);
+            })
+            ->first();
 
         if (! $user || ! $user->password || ! Hash::check($password, $user->password)) {
             throw new PasAuthenticationException('Username atau password PAS tidak sesuai.');
@@ -102,6 +108,7 @@ class PasAuthenticator
             'study_program' => $user->study_program,
             'roles' => $user->roles,
             'is_active' => $user->is_active,
+            'pas_password_changed' => $user->pas_password_changed,
         ];
     }
 
@@ -119,31 +126,72 @@ class PasAuthenticator
         }
 
         $roles = Arr::get($payload, 'roles', Arr::get($payload, 'role', ['dosen']));
-        $roles = is_array($roles) ? $roles : [$roles];
+        $roles = collect(is_array($roles) ? $roles : [$roles])
+            ->filter()
+            ->map(fn ($role) => Str::of((string) $role)->lower()->replace([' ', '-'], '_')->value())
+            ->map(fn (string $role): string => match ($role) {
+                'student' => 'mahasiswa',
+                'lecturer' => 'dosen',
+                default => $role,
+            })
+            ->unique()
+            ->values()
+            ->all();
+        $passwordChanged = $this->passwordWasChanged($payload);
+        $pasUsername = (string) (Arr::get($payload, 'username') ?? $fallbackUsername);
+        $identityNumber = $this->identityNumber($payload, $roles);
+        $syncedUsername = $passwordChanged && filled($identityNumber) ? $identityNumber : $pasUsername;
 
         return [
             'pas_user_id' => (string) $externalId,
-            'username' => (string) (Arr::get($payload, 'username') ?? $fallbackUsername),
+            'username' => $syncedUsername,
             'name' => (string) (Arr::get($payload, 'name') ?? Arr::get($payload, 'nama') ?? $fallbackUsername),
             'email' => Arr::get($payload, 'email'),
-            'identity_number' => Arr::get($payload, 'identity_number')
-                ?? Arr::get($payload, 'nidn')
-                ?? Arr::get($payload, 'nim')
-                ?? Arr::get($payload, 'nip'),
+            'identity_number' => $identityNumber,
             'unit' => Arr::get($payload, 'unit') ?? Arr::get($payload, 'unit_kerja'),
             'study_program' => Arr::get($payload, 'study_program') ?? Arr::get($payload, 'prodi'),
-            'roles' => collect($roles)
-                ->filter()
-                ->map(fn ($role) => Str::of((string) $role)->lower()->replace([' ', '-'], '_')->value())
-                ->map(fn (string $role): string => match ($role) {
-                    'student' => 'mahasiswa',
-                    'lecturer' => 'dosen',
-                    default => $role,
-                })
-                ->unique()
-                ->values()
-                ->all(),
+            'roles' => $roles,
             'is_active' => (bool) Arr::get($payload, 'is_active', Arr::get($payload, 'aktif', true)),
+            'pas_password_changed' => $passwordChanged,
         ];
+    }
+
+    /** @param array<string, mixed> $payload
+     * @param  list<string>  $roles
+     */
+    private function identityNumber(array $payload, array $roles): ?string
+    {
+        $identity = match (true) {
+            in_array('mahasiswa', $roles, true) => Arr::get($payload, 'nim')
+                ?? Arr::get($payload, 'identity_number'),
+            in_array('dosen', $roles, true) => Arr::get($payload, 'nidn')
+                ?? Arr::get($payload, 'kode_dosen')
+                ?? Arr::get($payload, 'lecturer_code')
+                ?? Arr::get($payload, 'identity_number')
+                ?? Arr::get($payload, 'nip'),
+            default => Arr::get($payload, 'identity_number') ?? Arr::get($payload, 'nip'),
+        };
+
+        return filled($identity) ? (string) $identity : null;
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function passwordWasChanged(array $payload): bool
+    {
+        if (filled(Arr::get($payload, 'password_changed_at'))) {
+            return true;
+        }
+
+        $value = Arr::get($payload, 'password_changed')
+            ?? Arr::get($payload, 'is_password_changed')
+            ?? Arr::get($payload, 'has_changed_password')
+            ?? Arr::get($payload, 'ganti_password')
+            ?? Arr::get($payload, 'status_ganti_password');
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        return in_array(Str::lower(trim((string) $value)), ['1', 'true', 'yes', 'ya', 'sudah', 'changed', 'diganti'], true);
     }
 }

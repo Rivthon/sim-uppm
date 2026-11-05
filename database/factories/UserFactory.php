@@ -36,6 +36,7 @@ class UserFactory extends Factory
             'study_program' => null,
             'roles' => ['dosen'],
             'account_source' => 'pas',
+            'pas_password_changed' => false,
             'is_active' => true,
             'pas_synced_at' => now(),
             'remember_token' => Str::random(10),
