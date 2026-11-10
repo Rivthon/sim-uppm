@@ -113,6 +113,7 @@ class StudentDashboardAccessTest extends TestCase
 
     public function test_seeded_mock_user_can_login_with_local_password(): void
     {
+        config()->set('services.pas.driver', 'mock');
         $lecturer = User::factory()->create([
             'username' => 'dosen.demo',
             'password' => Hash::make('password123'),

@@ -37,11 +37,13 @@ return [
 
     'pas' => [
         'driver' => env('PAS_DRIVER', 'mock'),
+        'database_connection' => env('PAS_DB_CONNECTION', 'pas'),
         'endpoint' => env('PAS_AUTH_ENDPOINT'),
         'token' => env('PAS_API_TOKEN'),
         'timeout' => (int) env('PAS_TIMEOUT', 10),
         'username_field' => env('PAS_USERNAME_FIELD', 'username'),
         'password_field' => env('PAS_PASSWORD_FIELD', 'password'),
+        'local_admin_enabled' => (bool) env('PAS_LOCAL_ADMIN_ENABLED', false),
         'mock_username' => env('PAS_MOCK_USERNAME', 'admin.uppm'),
         'mock_password' => env('PAS_MOCK_PASSWORD', 'uppm12345'),
     ],

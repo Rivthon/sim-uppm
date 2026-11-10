@@ -16,9 +16,10 @@ class ExampleTest extends TestCase
         $this->get('/login')->assertOk()->assertSee('Masuk dengan akun PAS');
     }
 
-    public function test_mock_pas_account_can_login_without_storing_pas_password(): void
+    public function test_configured_local_admin_can_login_while_database_pas_driver_is_active(): void
     {
-        config()->set('services.pas.driver', 'mock');
+        config()->set('services.pas.driver', 'database');
+        config()->set('services.pas.local_admin_enabled', true);
         config()->set('services.pas.mock_username', 'admin.uppm');
         config()->set('services.pas.mock_password', 'uppm12345');
 
